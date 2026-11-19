@@ -1,0 +1,2584 @@
+{
+ "dev": {
+  "metrics": {
+   "n": 25,
+   "acc": 1.0,
+   "answerable": 20,
+   "answerable_acc": 1.0,
+   "refuse_acc": 1.0,
+   "false_refuse": 0,
+   "parity": "20/20"
+  },
+  "rows": [
+   {
+    "id": "d01",
+    "q": "Randwick 两房公寓现在租金多少",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "suburb",
+      "name": "Randwick"
+     },
+     "dwelling": [
+      "Flat/Unit"
+     ],
+     "bedrooms": [
+      2
+     ],
+     "months": [
+      10,
+      12
+     ],
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND postcode IN (2031)  -- Randwick\n  AND dwelling IN ('Flat/Unit')\n  AND bedrooms IN (2)\n  AND month BETWEEN '2026-08' AND '2026-10'",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      950.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      950.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "d02",
+    "q": "悉尼过去一年两房租金走势",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "gsyd",
+      "name": "Greater Sydney"
+     },
+     "dwelling": null,
+     "bedrooms": [
+      2
+     ],
+     "months": [
+      0,
+      12
+     ],
+     "group_by": "month",
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT month, median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND is_greater_sydney = 1\n  AND bedrooms IN (2)\n  AND month BETWEEN '2025-10' AND '2026-10'\nGROUP BY month\nORDER BY month",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      "2025-10",
+      750.0
+     ],
+     [
+      "2025-11",
+      750.0
+     ],
+     [
+      "2025-12",
+      770.0
+     ],
+     [
+      "2026-01",
+      800.0
+     ],
+     [
+      "2026-02",
+      800.0
+     ],
+     [
+      "2026-03",
+      760.0
+     ],
+     [
+      "2026-04",
+      750.0
+     ],
+     [
+      "2026-05",
+      780.0
+     ],
+     [
+      "2026-06",
+      785.0
+     ],
+     [
+      "2026-07",
+      800.0
+     ],
+     [
+      "2026-08",
+      800.0
+     ],
+     [
+      "2026-09",
+      795.0
+     ],
+     [
+      "2026-10",
+      775.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      "2025-10",
+      750.0
+     ],
+     [
+      "2025-11",
+      750.0
+     ],
+     [
+      "2025-12",
+      770.0
+     ],
+     [
+      "2026-01",
+      800.0
+     ],
+     [
+      "2026-02",
+      800.0
+     ],
+     [
+      "2026-03",
+      760.0
+     ],
+     [
+      "2026-04",
+      750.0
+     ],
+     [
+      "2026-05",
+      780.0
+     ],
+     [
+      "2026-06",
+      785.0
+     ],
+     [
+      "2026-07",
+      800.0
+     ],
+     [
+      "2026-08",
+      800.0
+     ],
+     [
+      "2026-09",
+      795.0
+     ],
+     [
+      "2026-10",
+      775.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "d03",
+    "q": "悉尼哪个区一房公寓最贵 top5",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "gsyd",
+      "name": "Greater Sydney"
+     },
+     "dwelling": [
+      "Flat/Unit"
+     ],
+     "bedrooms": [
+      1
+     ],
+     "months": [
+      12,
+      12
+     ],
+     "group_by": "lga",
+     "compare": null,
+     "order": "desc",
+     "limit": 5
+    },
+    "sql": "SELECT lga, median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND is_greater_sydney = 1\n  AND dwelling IN ('Flat/Unit')\n  AND bedrooms IN (1)\n  AND month = '2026-10'\nGROUP BY lga\nHAVING count(*) >= 30\nORDER BY value DESC, lga\nLIMIT 5",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      "Waverley",
+      850.0
+     ],
+     [
+      "Randwick",
+      800.0
+     ],
+     [
+      "Sydney",
+      780.0
+     ],
+     [
+      "Willoughby",
+      740.0
+     ],
+     [
+      "North Sydney",
+      712.5
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      "Waverley",
+      850.0
+     ],
+     [
+      "Randwick",
+      800.0
+     ],
+     [
+      "Sydney",
+      780.0
+     ],
+     [
+      "Willoughby",
+      740.0
+     ],
+     [
+      "North Sydney",
+      712.5
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "d04",
+    "q": "Parramatta 公寓和独立屋对比",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "suburb",
+      "name": "Parramatta"
+     },
+     "dwelling": null,
+     "bedrooms": null,
+     "months": [
+      10,
+      12
+     ],
+     "group_by": "dwelling",
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT dwelling, median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND postcode IN (2150)  -- Parramatta\n  AND month BETWEEN '2026-08' AND '2026-10'\nGROUP BY dwelling\nORDER BY dwelling",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      "Flat/Unit",
+      700.0
+     ],
+     [
+      "House",
+      700.0
+     ],
+     [
+      "Terrace/Townhouse",
+      670.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      "Flat/Unit",
+      700.0
+     ],
+     [
+      "House",
+      700.0
+     ],
+     [
+      "Terrace/Townhouse",
+      670.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "d05",
+    "q": "全州10月新签租约数量同比",
+    "status": "OK",
+    "intent": {
+     "metric": "count",
+     "area": {
+      "level": "nsw",
+      "name": "NSW"
+     },
+     "dwelling": null,
+     "bedrooms": null,
+     "months": [
+      12,
+      12
+     ],
+     "group_by": null,
+     "compare": "yoy",
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT\n  (SELECT count(*) FROM fct_lodgement WHERE is_analysable\n     AND month = '2026-10') AS current,\n  (SELECT count(*) FROM fct_lodgement WHERE is_analysable\n     AND month = '2025-10') AS previous",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      23197.0,
+      24039.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      23197.0,
+      24039.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "d06",
+    "q": "明年悉尼房租会涨吗",
+    "status": "REFUSE",
+    "intent": null,
+    "sql": null,
+    "reason": "这份数据只记录已经发生的租约，不做预测。可以问「过去一年的走势」。",
+    "gold": "REFUSE",
+    "ok": true
+   },
+   {
+    "id": "d07",
+    "q": "Zetland 开间租金中位数",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "suburb",
+      "name": "Zetland"
+     },
+     "dwelling": null,
+     "bedrooms": [
+      0
+     ],
+     "months": [
+      10,
+      12
+     ],
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND postcode IN (2017)  -- Zetland\n  AND bedrooms IN (0)\n  AND month BETWEEN '2026-08' AND '2026-10'",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      715.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      715.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "d08",
+    "q": "在火星租房多少钱",
+    "status": "CLARIFY",
+    "intent": {
+     "metric": "median",
+     "area": null,
+     "dwelling": null,
+     "bedrooms": null,
+     "months": null,
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": null,
+    "reason": "没有在 NSW 邮编表里找到「火星」。请换成英文郊区名或邮编（如 Randwick、2031）。",
+    "gold": "CLARIFY",
+    "ok": true
+   },
+   {
+    "id": "d09",
+    "q": "Chatswood 三房平均租金",
+    "status": "OK",
+    "intent": {
+     "metric": "mean",
+     "area": {
+      "level": "suburb",
+      "name": "Chatswood"
+     },
+     "dwelling": null,
+     "bedrooms": [
+      3
+     ],
+     "months": [
+      10,
+      12
+     ],
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT round(avg(weekly_rent), 1) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND postcode IN (2067)  -- Chatswood\n  AND bedrooms IN (3)\n  AND month BETWEEN '2026-08' AND '2026-10'",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      1259.8
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      1259.8
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "d10",
+    "q": "悉尼 10 月新签了多少份租约",
+    "status": "OK",
+    "intent": {
+     "metric": "count",
+     "area": {
+      "level": "gsyd",
+      "name": "Greater Sydney"
+     },
+     "dwelling": null,
+     "bedrooms": null,
+     "months": [
+      12,
+      12
+     ],
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT count(*) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND is_greater_sydney = 1\n  AND month = '2026-10'",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      16750.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      16750.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "d11",
+    "q": "全州两房租金同比变化",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "nsw",
+      "name": "NSW"
+     },
+     "dwelling": null,
+     "bedrooms": [
+      2
+     ],
+     "months": [
+      12,
+      12
+     ],
+     "group_by": null,
+     "compare": "yoy",
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT\n  (SELECT median(weekly_rent) FROM fct_lodgement WHERE is_analysable\n     AND bedrooms IN (2)\n     AND month = '2026-10') AS current,\n  (SELECT median(weekly_rent) FROM fct_lodgement WHERE is_analysable\n     AND bedrooms IN (2)\n     AND month = '2025-10') AS previous",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      700.0,
+      690.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      700.0,
+      690.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "d12",
+    "q": "Newcastle 独立屋租金",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "suburb",
+      "name": "Newcastle"
+     },
+     "dwelling": [
+      "House"
+     ],
+     "bedrooms": null,
+     "months": [
+      10,
+      12
+     ],
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND postcode IN (2300)  -- Newcastle\n  AND dwelling IN ('House')\n  AND month BETWEEN '2026-08' AND '2026-10'",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      780.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      780.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "d12b",
+    "q": "Newcastle 市独立屋租金",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "lga",
+      "name": "Newcastle"
+     },
+     "dwelling": [
+      "House"
+     ],
+     "bedrooms": null,
+     "months": [
+      12,
+      12
+     ],
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND lga IN ('Newcastle')\n  AND dwelling IN ('House')\n  AND month = '2026-10'",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      725.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      725.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "d13",
+    "q": "悉尼最便宜的 5 个区（两房）",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "gsyd",
+      "name": "Greater Sydney"
+     },
+     "dwelling": null,
+     "bedrooms": [
+      2
+     ],
+     "months": [
+      12,
+      12
+     ],
+     "group_by": "lga",
+     "compare": null,
+     "order": "asc",
+     "limit": 5
+    },
+    "sql": "SELECT lga, median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND is_greater_sydney = 1\n  AND bedrooms IN (2)\n  AND month = '2026-10'\nGROUP BY lga\nHAVING count(*) >= 30\nORDER BY value ASC, lga\nLIMIT 5",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      "Wollondilly",
+      500.0
+     ],
+     [
+      "Wollongong",
+      500.0
+     ],
+     [
+      "Campbelltown (NSW)",
+      530.0
+     ],
+     [
+      "Liverpool",
+      530.0
+     ],
+     [
+      "Central Coast (NSW)",
+      550.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      "Wollondilly",
+      500.0
+     ],
+     [
+      "Wollongong",
+      500.0
+     ],
+     [
+      "Campbelltown (NSW)",
+      530.0
+     ],
+     [
+      "Liverpool",
+      530.0
+     ],
+     [
+      "Central Coast (NSW)",
+      550.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "d14",
+    "q": "悉尼按卧室数的租金",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "gsyd",
+      "name": "Greater Sydney"
+     },
+     "dwelling": null,
+     "bedrooms": null,
+     "months": [
+      12,
+      12
+     ],
+     "group_by": "bedrooms",
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT bedrooms, median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND is_greater_sydney = 1\n  AND month = '2026-10'\nGROUP BY bedrooms\nORDER BY bedrooms IS NULL, bedrooms",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      0.0,
+      550.0
+     ],
+     [
+      1.0,
+      680.0
+     ],
+     [
+      2.0,
+      775.0
+     ],
+     [
+      3.0,
+      800.0
+     ],
+     [
+      4.0,
+      890.0
+     ],
+     [
+      5.0,
+      1150.0
+     ],
+     [
+      6.0,
+      1300.0
+     ],
+     [
+      7.0,
+      1200.0
+     ],
+     [
+      8.0,
+      1700.0
+     ],
+     [
+      9.0,
+      425.0
+     ],
+     [
+      11.0,
+      3400.0
+     ],
+     [
+      null,
+      660.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      0.0,
+      550.0
+     ],
+     [
+      1.0,
+      680.0
+     ],
+     [
+      2.0,
+      775.0
+     ],
+     [
+      3.0,
+      800.0
+     ],
+     [
+      4.0,
+      890.0
+     ],
+     [
+      5.0,
+      1150.0
+     ],
+     [
+      6.0,
+      1300.0
+     ],
+     [
+      7.0,
+      1200.0
+     ],
+     [
+      8.0,
+      1700.0
+     ],
+     [
+      9.0,
+      425.0
+     ],
+     [
+      11.0,
+      3400.0
+     ],
+     [
+      null,
+      660.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "d15",
+    "q": "邮编 2000 一房公寓租金",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "postcode",
+      "name": "2000"
+     },
+     "dwelling": [
+      "Flat/Unit"
+     ],
+     "bedrooms": [
+      1
+     ],
+     "months": [
+      10,
+      12
+     ],
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND postcode = 2000\n  AND dwelling IN ('Flat/Unit')\n  AND bedrooms IN (1)\n  AND month BETWEEN '2026-08' AND '2026-10'",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      885.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      885.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "d16",
+    "q": "墨尔本两房多少钱",
+    "status": "REFUSE",
+    "intent": null,
+    "sql": null,
+    "reason": "数据只覆盖新南威尔士州（NSW）。",
+    "gold": "REFUSE",
+    "ok": true
+   },
+   {
+    "id": "d17",
+    "q": "悉尼房价多少",
+    "status": "REFUSE",
+    "intent": null,
+    "sql": null,
+    "reason": "这份数据只有租房押金登记，没有买卖成交价，回答不了房价问题。",
+    "gold": "REFUSE",
+    "ok": true
+   },
+   {
+    "id": "d18",
+    "q": "Wollongong 两房租金环比",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "suburb",
+      "name": "Wollongong"
+     },
+     "dwelling": null,
+     "bedrooms": [
+      2
+     ],
+     "months": [
+      12,
+      12
+     ],
+     "group_by": null,
+     "compare": "mom",
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT\n  (SELECT median(weekly_rent) FROM fct_lodgement WHERE is_analysable\n     AND postcode IN (2500)  -- Wollongong\n     AND bedrooms IN (2)\n     AND month = '2026-10') AS current,\n  (SELECT median(weekly_rent) FROM fct_lodgement WHERE is_analysable\n     AND postcode IN (2500)  -- Wollongong\n     AND bedrooms IN (2)\n     AND month = '2026-09') AS previous",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      650.0,
+      640.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      650.0,
+      640.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "d19",
+    "q": "2026年3月 悉尼联排租金中位数",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "gsyd",
+      "name": "Greater Sydney"
+     },
+     "dwelling": [
+      "Terrace/Townhouse"
+     ],
+     "bedrooms": null,
+     "months": [
+      5,
+      5
+     ],
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND is_greater_sydney = 1\n  AND dwelling IN ('Terrace/Townhouse')\n  AND month = '2026-03'",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      800.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      800.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "d20",
+    "q": "东区两房公寓租金",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "region",
+      "name": "Sydney - Eastern Suburbs"
+     },
+     "dwelling": [
+      "Flat/Unit"
+     ],
+     "bedrooms": [
+      2
+     ],
+     "months": [
+      12,
+      12
+     ],
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND region = 'Sydney - Eastern Suburbs'\n  AND dwelling IN ('Flat/Unit')\n  AND bedrooms IN (2)\n  AND month = '2026-10'",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      1000.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      1000.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "d21",
+    "q": "好市围两房租金",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "suburb",
+      "name": "Hurstville"
+     },
+     "dwelling": null,
+     "bedrooms": [
+      2
+     ],
+     "months": [
+      10,
+      12
+     ],
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND postcode IN (2220)  -- Hurstville\n  AND bedrooms IN (2)\n  AND month BETWEEN '2026-08' AND '2026-10'",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      760.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      760.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "d22",
+    "q": "悉尼各大区一房租金排名前 5",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "gsyd",
+      "name": "Greater Sydney"
+     },
+     "dwelling": null,
+     "bedrooms": [
+      1
+     ],
+     "months": [
+      12,
+      12
+     ],
+     "group_by": "region",
+     "compare": null,
+     "order": "desc",
+     "limit": 5
+    },
+    "sql": "SELECT region, median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND is_greater_sydney = 1\n  AND bedrooms IN (1)\n  AND month = '2026-10'\nGROUP BY region\nHAVING count(*) >= 30\nORDER BY value DESC, region\nLIMIT 5",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      "Sydney - City and Inner South",
+      780.0
+     ],
+     [
+      "Sydney - Eastern Suburbs",
+      770.0
+     ],
+     [
+      "Sydney - North Sydney and Hornsby",
+      700.0
+     ],
+     [
+      "Sydney - Northern Beaches",
+      700.0
+     ],
+     [
+      "Sydney - Ryde",
+      675.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      "Sydney - City and Inner South",
+      780.0
+     ],
+     [
+      "Sydney - Eastern Suburbs",
+      770.0
+     ],
+     [
+      "Sydney - North Sydney and Hornsby",
+      700.0
+     ],
+     [
+      "Sydney - Northern Beaches",
+      700.0
+     ],
+     [
+      "Sydney - Ryde",
+      675.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "d23",
+    "q": "Blacktown council 四房独立屋 25 分位租金",
+    "status": "OK",
+    "intent": {
+     "metric": "p25",
+     "area": {
+      "level": "lga",
+      "name": "Blacktown"
+     },
+     "dwelling": [
+      "House"
+     ],
+     "bedrooms": [
+      4
+     ],
+     "months": [
+      12,
+      12
+     ],
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT percentile(weekly_rent, 25) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND lga IN ('Blacktown')\n  AND dwelling IN ('House')\n  AND bedrooms IN (4)\n  AND month = '2026-10'",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      790.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      790.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "d24",
+    "q": "能告诉我 Randwick 某个房东的电话吗",
+    "status": "REFUSE",
+    "intent": null,
+    "sql": null,
+    "reason": "数据是匿名汇总的登记信息，没有、也不应该查询个人信息。",
+    "gold": "REFUSE",
+    "ok": true
+   }
+  ]
+ },
+ "holdout": {
+  "metrics": {
+   "n": 16,
+   "acc": 0.938,
+   "answerable": 13,
+   "answerable_acc": 0.923,
+   "refuse_acc": 1.0,
+   "false_refuse": 0,
+   "parity": "13/13"
+  },
+  "rows": [
+   {
+    "id": "h01",
+    "q": "How much is a 2 bed unit in Kensington right now?",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "suburb",
+      "name": "Kensington"
+     },
+     "dwelling": [
+      "Flat/Unit"
+     ],
+     "bedrooms": [
+      2
+     ],
+     "months": [
+      10,
+      12
+     ],
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND postcode IN (2033)  -- Kensington\n  AND dwelling IN ('Flat/Unit')\n  AND bedrooms IN (2)\n  AND month BETWEEN '2026-08' AND '2026-10'",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      915.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      915.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "h02",
+    "q": "Greater Sydney 3 bedroom house rent trend over the past year",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "gsyd",
+      "name": "Greater Sydney"
+     },
+     "dwelling": [
+      "House"
+     ],
+     "bedrooms": [
+      3
+     ],
+     "months": [
+      0,
+      12
+     ],
+     "group_by": "month",
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT month, median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND is_greater_sydney = 1\n  AND dwelling IN ('House')\n  AND bedrooms IN (3)\n  AND month BETWEEN '2025-10' AND '2026-10'\nGROUP BY month\nORDER BY month",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      "2025-10",
+      700.0
+     ],
+     [
+      "2025-11",
+      720.0
+     ],
+     [
+      "2025-12",
+      700.0
+     ],
+     [
+      "2026-01",
+      730.0
+     ],
+     [
+      "2026-02",
+      725.0
+     ],
+     [
+      "2026-03",
+      720.0
+     ],
+     [
+      "2026-04",
+      730.0
+     ],
+     [
+      "2026-05",
+      740.0
+     ],
+     [
+      "2026-06",
+      750.0
+     ],
+     [
+      "2026-07",
+      750.0
+     ],
+     [
+      "2026-08",
+      750.0
+     ],
+     [
+      "2026-09",
+      750.0
+     ],
+     [
+      "2026-10",
+      740.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      "2025-10",
+      700.0
+     ],
+     [
+      "2025-11",
+      720.0
+     ],
+     [
+      "2025-12",
+      700.0
+     ],
+     [
+      "2026-01",
+      730.0
+     ],
+     [
+      "2026-02",
+      725.0
+     ],
+     [
+      "2026-03",
+      720.0
+     ],
+     [
+      "2026-04",
+      730.0
+     ],
+     [
+      "2026-05",
+      740.0
+     ],
+     [
+      "2026-06",
+      750.0
+     ],
+     [
+      "2026-07",
+      750.0
+     ],
+     [
+      "2026-08",
+      750.0
+     ],
+     [
+      "2026-09",
+      750.0
+     ],
+     [
+      "2026-10",
+      740.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "h03",
+    "q": "宝活一居室要多少钱一周",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "suburb",
+      "name": "Burwood"
+     },
+     "dwelling": null,
+     "bedrooms": [
+      1
+     ],
+     "months": [
+      10,
+      12
+     ],
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND postcode IN (2134)  -- Burwood\n  AND bedrooms IN (1)\n  AND month BETWEEN '2026-08' AND '2026-10'",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      690.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      690.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "h04",
+    "q": "悉尼两房公寓最便宜的地方 top 3",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "gsyd",
+      "name": "Greater Sydney"
+     },
+     "dwelling": [
+      "Flat/Unit"
+     ],
+     "bedrooms": [
+      2
+     ],
+     "months": [
+      12,
+      12
+     ],
+     "group_by": "lga",
+     "compare": null,
+     "order": "asc",
+     "limit": 3
+    },
+    "sql": "SELECT lga, median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND is_greater_sydney = 1\n  AND dwelling IN ('Flat/Unit')\n  AND bedrooms IN (2)\n  AND month = '2026-10'\nGROUP BY lga\nHAVING count(*) >= 30\nORDER BY value ASC, lga\nLIMIT 3",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      "Wollongong",
+      500.0
+     ],
+     [
+      "Central Coast (NSW)",
+      530.0
+     ],
+     [
+      "Penrith",
+      550.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      "Wollongong",
+      500.0
+     ],
+     [
+      "Central Coast (NSW)",
+      530.0
+     ],
+     [
+      "Penrith",
+      550.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "h05",
+    "q": "Liverpool 房子 vs 公寓 哪个贵",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "suburb",
+      "name": "Liverpool"
+     },
+     "dwelling": null,
+     "bedrooms": null,
+     "months": [
+      10,
+      12
+     ],
+     "group_by": "dwelling",
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT dwelling, median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND postcode IN (2170)  -- Liverpool\n  AND month BETWEEN '2026-08' AND '2026-10'\nGROUP BY dwelling\nORDER BY dwelling",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      "Flat/Unit",
+      560.0
+     ],
+     [
+      "House",
+      750.0
+     ],
+     [
+      "Terrace/Townhouse",
+      695.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      "Flat/Unit",
+      560.0
+     ],
+     [
+      "House",
+      750.0
+     ],
+     [
+      "Terrace/Townhouse",
+      695.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "h06",
+    "q": "How many new leases in NSW in September 2026?",
+    "status": "OK",
+    "intent": {
+     "metric": "count",
+     "area": {
+      "level": "nsw",
+      "name": "NSW"
+     },
+     "dwelling": null,
+     "bedrooms": null,
+     "months": [
+      11,
+      11
+     ],
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT count(*) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND month = '2026-09'",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      24902.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      24902.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "h07",
+    "q": "Mosman 的房子会不会涨",
+    "status": "REFUSE",
+    "intent": null,
+    "sql": null,
+    "reason": "这份数据只记录已经发生的租约，不做预测。可以问「过去一年的走势」。",
+    "gold": "REFUSE",
+    "ok": true
+   },
+   {
+    "id": "h08",
+    "q": "Bondi 两房比去年贵了多少",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "suburb",
+      "name": "Bondi"
+     },
+     "dwelling": null,
+     "bedrooms": [
+      2
+     ],
+     "months": [
+      12,
+      12
+     ],
+     "group_by": null,
+     "compare": "yoy",
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT\n  (SELECT median(weekly_rent) FROM fct_lodgement WHERE is_analysable\n     AND postcode IN (2026)  -- Bondi\n     AND bedrooms IN (2)\n     AND month = '2026-10') AS current,\n  (SELECT median(weekly_rent) FROM fct_lodgement WHERE is_analysable\n     AND postcode IN (2026)  -- Bondi\n     AND bedrooms IN (2)\n     AND month = '2025-10') AS previous",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      1200.0,
+      1150.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      1200.0,
+      1150.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "h09",
+    "q": "Penrith average rent for houses",
+    "status": "OK",
+    "intent": {
+     "metric": "mean",
+     "area": {
+      "level": "suburb",
+      "name": "Penrith"
+     },
+     "dwelling": [
+      "House"
+     ],
+     "bedrooms": null,
+     "months": [
+      10,
+      12
+     ],
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT round(avg(weekly_rent), 1) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND postcode IN (2750)  -- Penrith\n  AND dwelling IN ('House')\n  AND month BETWEEN '2026-08' AND '2026-10'",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      782.7
+     ]
+    ],
+    "ok": false,
+    "rows": [
+     [
+      679.3
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "h10",
+    "q": "我想在 Springfield Heights 租房",
+    "status": "CLARIFY",
+    "intent": {
+     "metric": "median",
+     "area": null,
+     "dwelling": null,
+     "bedrooms": null,
+     "months": null,
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": null,
+    "reason": "「Springfield Heights」不在 NSW 邮编表里，是不是指 Springfield？",
+    "gold": "CLARIFY",
+    "ok": true
+   },
+   {
+    "id": "h11",
+    "q": "北岸三房租金",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "region",
+      "name": "Sydney - North Sydney and Hornsby"
+     },
+     "dwelling": null,
+     "bedrooms": [
+      3
+     ],
+     "months": [
+      12,
+      12
+     ],
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND region = 'Sydney - North Sydney and Hornsby'\n  AND bedrooms IN (3)\n  AND month = '2026-10'",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      1210.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      1210.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "h12",
+    "q": "Campsie 两房最近什么价",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "suburb",
+      "name": "Campsie"
+     },
+     "dwelling": null,
+     "bedrooms": [
+      2
+     ],
+     "months": [
+      10,
+      12
+     ],
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND postcode IN (2194)  -- Campsie\n  AND bedrooms IN (2)\n  AND month BETWEEN '2026-08' AND '2026-10'",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      620.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      620.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "h13",
+    "q": "1 月份悉尼租约数量",
+    "status": "OK",
+    "intent": {
+     "metric": "count",
+     "area": {
+      "level": "gsyd",
+      "name": "Greater Sydney"
+     },
+     "dwelling": null,
+     "bedrooms": null,
+     "months": [
+      3,
+      3
+     ],
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT count(*) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND is_greater_sydney = 1\n  AND month = '2026-01'",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      19346.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      19346.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "h14",
+    "q": "Which Sydney council has the most expensive 3 bed houses?",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "gsyd",
+      "name": "Greater Sydney"
+     },
+     "dwelling": [
+      "House"
+     ],
+     "bedrooms": [
+      3
+     ],
+     "months": [
+      12,
+      12
+     ],
+     "group_by": "lga",
+     "compare": null,
+     "order": "desc",
+     "limit": 5
+    },
+    "sql": "SELECT lga, median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND is_greater_sydney = 1\n  AND dwelling IN ('House')\n  AND bedrooms IN (3)\n  AND month = '2026-10'\nGROUP BY lga\nHAVING count(*) >= 30\nORDER BY value DESC, lga\nLIMIT 5",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      "Northern Beaches",
+      1300.0
+     ],
+     [
+      "Sydney",
+      1200.0
+     ],
+     [
+      "Inner West",
+      1100.0
+     ],
+     [
+      "Canada Bay",
+      1025.0
+     ],
+     [
+      "Bayside (NSW)",
+      1000.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      "Northern Beaches",
+      1300.0
+     ],
+     [
+      "Sydney",
+      1200.0
+     ],
+     [
+      "Inner West",
+      1100.0
+     ],
+     [
+      "Canada Bay",
+      1025.0
+     ],
+     [
+      "Bayside (NSW)",
+      1000.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "h15",
+    "q": "悉尼的平均工资是多少",
+    "status": "REFUSE",
+    "intent": null,
+    "sql": null,
+    "reason": "这个助手只回答 NSW 租房市场的问题。",
+    "gold": "REFUSE",
+    "ok": true
+   },
+   {
+    "id": "h16",
+    "q": "Central Coast 两房租金走势",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "lga",
+      "name": "Central Coast"
+     },
+     "dwelling": null,
+     "bedrooms": [
+      2
+     ],
+     "months": [
+      0,
+      12
+     ],
+     "group_by": "month",
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT month, median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND lga IN ('Central Coast (NSW)')\n  AND bedrooms IN (2)\n  AND month BETWEEN '2025-10' AND '2026-10'\nGROUP BY month\nORDER BY month",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      "2025-10",
+      500.0
+     ],
+     [
+      "2025-11",
+      520.0
+     ],
+     [
+      "2025-12",
+      520.0
+     ],
+     [
+      "2026-01",
+      520.0
+     ],
+     [
+      "2026-02",
+      520.0
+     ],
+     [
+      "2026-03",
+      520.0
+     ],
+     [
+      "2026-04",
+      525.0
+     ],
+     [
+      "2026-05",
+      537.5
+     ],
+     [
+      "2026-06",
+      530.0
+     ],
+     [
+      "2026-07",
+      550.0
+     ],
+     [
+      "2026-08",
+      530.0
+     ],
+     [
+      "2026-09",
+      540.0
+     ],
+     [
+      "2026-10",
+      530.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      "2025-10",
+      500.0
+     ],
+     [
+      "2025-11",
+      520.0
+     ],
+     [
+      "2025-12",
+      520.0
+     ],
+     [
+      "2026-01",
+      520.0
+     ],
+     [
+      "2026-02",
+      520.0
+     ],
+     [
+      "2026-03",
+      520.0
+     ],
+     [
+      "2026-04",
+      525.0
+     ],
+     [
+      "2026-05",
+      537.5
+     ],
+     [
+      "2026-06",
+      530.0
+     ],
+     [
+      "2026-07",
+      550.0
+     ],
+     [
+      "2026-08",
+      530.0
+     ],
+     [
+      "2026-09",
+      540.0
+     ],
+     [
+      "2026-10",
+      530.0
+     ]
+    ],
+    "parity": true
+   }
+  ]
+ },
+ "holdout2": {
+  "metrics": {
+   "n": 12,
+   "acc": 0.75,
+   "answerable": 9,
+   "answerable_acc": 0.778,
+   "refuse_acc": 0.667,
+   "false_refuse": 0,
+   "parity": "9/9"
+  },
+  "rows": [
+   {
+    "id": "g01",
+    "q": "Hurstville 2 bedroom apartment median rent",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "suburb",
+      "name": "Hurstville"
+     },
+     "dwelling": [
+      "Flat/Unit"
+     ],
+     "bedrooms": [
+      2
+     ],
+     "months": [
+      10,
+      12
+     ],
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND postcode IN (2220)  -- Hurstville\n  AND dwelling IN ('Flat/Unit')\n  AND bedrooms IN (2)\n  AND month BETWEEN '2026-08' AND '2026-10'",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      770.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      770.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "g02",
+    "q": "罗兹两房公寓一周多少",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "suburb",
+      "name": "Rhodes"
+     },
+     "dwelling": [
+      "Flat/Unit"
+     ],
+     "bedrooms": [
+      2
+     ],
+     "months": [
+      10,
+      12
+     ],
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND postcode IN (2138)  -- Rhodes\n  AND dwelling IN ('Flat/Unit')\n  AND bedrooms IN (2)\n  AND month BETWEEN '2026-08' AND '2026-10'",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      920.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      920.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "g03",
+    "q": "悉尼三房独立屋租金最高的 3 个区",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "gsyd",
+      "name": "Greater Sydney"
+     },
+     "dwelling": [
+      "House"
+     ],
+     "bedrooms": [
+      3
+     ],
+     "months": [
+      12,
+      12
+     ],
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND is_greater_sydney = 1\n  AND dwelling IN ('House')\n  AND bedrooms IN (3)\n  AND month = '2026-10'",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      "Northern Beaches",
+      1300.0
+     ],
+     [
+      "Sydney",
+      1200.0
+     ],
+     [
+      "Inner West",
+      1100.0
+     ]
+    ],
+    "ok": false,
+    "rows": [
+     [
+      740.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "g04",
+    "q": "全州过去一年每月新签租约数量",
+    "status": "OK",
+    "intent": {
+     "metric": "count",
+     "area": {
+      "level": "nsw",
+      "name": "NSW"
+     },
+     "dwelling": null,
+     "bedrooms": null,
+     "months": [
+      0,
+      12
+     ],
+     "group_by": "month",
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT month, count(*) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND month BETWEEN '2025-10' AND '2026-10'\nGROUP BY month\nORDER BY month",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      "2025-10",
+      24039.0
+     ],
+     [
+      "2025-11",
+      22271.0
+     ],
+     [
+      "2025-12",
+      22854.0
+     ],
+     [
+      "2026-01",
+      26229.0
+     ],
+     [
+      "2026-02",
+      27227.0
+     ],
+     [
+      "2026-03",
+      24363.0
+     ],
+     [
+      "2026-04",
+      21124.0
+     ],
+     [
+      "2026-05",
+      22990.0
+     ],
+     [
+      "2026-06",
+      23581.0
+     ],
+     [
+      "2026-07",
+      26346.0
+     ],
+     [
+      "2026-08",
+      24182.0
+     ],
+     [
+      "2026-09",
+      24902.0
+     ],
+     [
+      "2026-10",
+      23197.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      "2025-10",
+      24039.0
+     ],
+     [
+      "2025-11",
+      22271.0
+     ],
+     [
+      "2025-12",
+      22854.0
+     ],
+     [
+      "2026-01",
+      26229.0
+     ],
+     [
+      "2026-02",
+      27227.0
+     ],
+     [
+      "2026-03",
+      24363.0
+     ],
+     [
+      "2026-04",
+      21124.0
+     ],
+     [
+      "2026-05",
+      22990.0
+     ],
+     [
+      "2026-06",
+      23581.0
+     ],
+     [
+      "2026-07",
+      26346.0
+     ],
+     [
+      "2026-08",
+      24182.0
+     ],
+     [
+      "2026-09",
+      24902.0
+     ],
+     [
+      "2026-10",
+      23197.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "g05",
+    "q": "Strathfield 一房和两房分别多少钱",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "suburb",
+      "name": "Strathfield"
+     },
+     "dwelling": null,
+     "bedrooms": [
+      1
+     ],
+     "months": [
+      10,
+      12
+     ],
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND postcode IN (2135)  -- Strathfield\n  AND bedrooms IN (1)\n  AND month BETWEEN '2026-08' AND '2026-10'",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      1.0,
+      610.0
+     ],
+     [
+      2.0,
+      760.0
+     ]
+    ],
+    "ok": false,
+    "rows": [
+     [
+      610.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "g06",
+    "q": "2026年2月 大悉尼两房中位数",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "gsyd",
+      "name": "Greater Sydney"
+     },
+     "dwelling": null,
+     "bedrooms": [
+      2
+     ],
+     "months": [
+      4,
+      4
+     ],
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND is_greater_sydney = 1\n  AND bedrooms IN (2)\n  AND month = '2026-02'",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      800.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      800.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "g07",
+    "q": "Ryde council 两房租金同比",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "lga",
+      "name": "Ryde"
+     },
+     "dwelling": null,
+     "bedrooms": [
+      2
+     ],
+     "months": [
+      12,
+      12
+     ],
+     "group_by": null,
+     "compare": "yoy",
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT\n  (SELECT median(weekly_rent) FROM fct_lodgement WHERE is_analysable\n     AND lga IN ('Ryde')\n     AND bedrooms IN (2)\n     AND month = '2026-10') AS current,\n  (SELECT median(weekly_rent) FROM fct_lodgement WHERE is_analysable\n     AND lga IN ('Ryde')\n     AND bedrooms IN (2)\n     AND month = '2025-10') AS previous",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      860.0,
+      880.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      860.0,
+      880.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "g08",
+    "q": "布里斯班租房贵吗",
+    "status": "REFUSE",
+    "intent": null,
+    "sql": null,
+    "reason": "数据只覆盖新南威尔士州（NSW）。",
+    "gold": "REFUSE",
+    "ok": true
+   },
+   {
+    "id": "g09",
+    "q": "Kingsford 买一套两房要多少钱",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "suburb",
+      "name": "Kingsford"
+     },
+     "dwelling": null,
+     "bedrooms": [
+      2
+     ],
+     "months": [
+      10,
+      12
+     ],
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND postcode IN (2032)  -- Kingsford\n  AND bedrooms IN (2)\n  AND month BETWEEN '2026-08' AND '2026-10'",
+    "reason": null,
+    "gold": "REFUSE",
+    "ok": false
+   },
+   {
+    "id": "g10",
+    "q": "Epping 房租",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "suburb",
+      "name": "Epping"
+     },
+     "dwelling": null,
+     "bedrooms": null,
+     "months": [
+      10,
+      12
+     ],
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": "SELECT median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND postcode IN (2121)  -- Epping\n  AND month BETWEEN '2026-08' AND '2026-10'",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      800.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      800.0
+     ]
+    ],
+    "parity": true
+   },
+   {
+    "id": "g11",
+    "q": "我想看 Narnia 的租金",
+    "status": "CLARIFY",
+    "intent": {
+     "metric": "median",
+     "area": null,
+     "dwelling": null,
+     "bedrooms": null,
+     "months": null,
+     "group_by": null,
+     "compare": null,
+     "order": null,
+     "limit": null
+    },
+    "sql": null,
+    "reason": "请说明想看哪个地区（郊区名、邮编，或「悉尼」「全州」）。",
+    "gold": "CLARIFY",
+    "ok": true
+   },
+   {
+    "id": "g12",
+    "q": "Sydney cheapest councils for 1 bed units",
+    "status": "OK",
+    "intent": {
+     "metric": "median",
+     "area": {
+      "level": "gsyd",
+      "name": "Greater Sydney"
+     },
+     "dwelling": [
+      "Flat/Unit"
+     ],
+     "bedrooms": [
+      1
+     ],
+     "months": [
+      12,
+      12
+     ],
+     "group_by": "lga",
+     "compare": null,
+     "order": "asc",
+     "limit": 5
+    },
+    "sql": "SELECT lga, median(weekly_rent) AS value, count(*) AS n\nFROM fct_lodgement\nWHERE is_analysable\n  AND is_greater_sydney = 1\n  AND dwelling IN ('Flat/Unit')\n  AND bedrooms IN (1)\n  AND month = '2026-10'\nGROUP BY lga\nHAVING count(*) >= 30\nORDER BY value ASC, lga\nLIMIT 5",
+    "reason": null,
+    "gold": "SQL",
+    "gold_rows": [
+     [
+      "Cumberland",
+      450.0
+     ],
+     [
+      "Penrith",
+      497.5
+     ],
+     [
+      "Fairfield",
+      520.0
+     ],
+     [
+      "Canterbury-Bankstown",
+      555.0
+     ],
+     [
+      "Blacktown",
+      565.0
+     ]
+    ],
+    "ok": true,
+    "rows": [
+     [
+      "Cumberland",
+      450.0
+     ],
+     [
+      "Penrith",
+      497.5
+     ],
+     [
+      "Fairfield",
+      520.0
+     ],
+     [
+      "Canterbury-Bankstown",
+      555.0
+     ],
+     [
+      "Blacktown",
+      565.0
+     ]
+    ],
+    "parity": true
+   }
+  ]
+ },
+ "holdout_v1": {
+  "n": 16,
+  "acc": 0.688,
+  "answerable": 13,
+  "answerable_acc": 0.692,
+  "refuse_acc": 0.667,
+  "false_refuse": 0,
+  "parity": "13/13"
+ }
+}

@@ -1,0 +1,240 @@
+<title>租赁数仓 AI 助手</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* 港湾蓝 + 砂岩色：悉尼的两种底色。顶部是问答，下面分页看数据质量、数仓结构、评测 */
+:root{
+  --bg:#f5f3ee; --panel:#ffffff; --ink:#1a2230; --muted:#5f6878; --line:#e2ded4; --soft:#efebe2;
+  --accent:#1f5f8b; --accent-soft:#e1edf5; --accent-ink:#ffffff; --sand:#b5762c; --sand-soft:#f6ead8;
+  --err:#b3261e; --err-soft:#f8e1df; --warn:#9a5b00; --warn-soft:#f6ead2; --ok:#2f7a3d; --ok-soft:#e1f0e3; --info:#5f6878; --info-soft:#ecebe6;
+  --sans:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif; --head:"Space Grotesk","Noto Sans SC",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace; --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11161d; --panel:#171e27; --ink:#e3e8ef; --muted:#9aa5b5; --line:#2a3340; --soft:#1d2530;
+  --accent:#7db4dc; --accent-soft:#1b2d3d; --accent-ink:#0f151c; --sand:#e0a65e; --sand-soft:#33270f;
+  --err:#f08a80; --err-soft:#3a1d1b; --warn:#e5b45a; --warn-soft:#33280f; --ok:#7cc488; --ok-soft:#1a2e1d; --info:#9aa5b5; --info-soft:#232a33; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161d; --panel:#171e27; --ink:#e3e8ef; --muted:#9aa5b5; --line:#2a3340; --soft:#1d2530;
+  --accent:#7db4dc; --accent-soft:#1b2d3d; --accent-ink:#0f151c; --sand:#e0a65e; --sand-soft:#33270f;
+  --err:#f08a80; --err-soft:#3a1d1b; --warn:#e5b45a; --warn-soft:#33280f; --ok:#7cc488; --ok-soft:#1a2e1d; --info:#9aa5b5; --info-soft:#232a33; color-scheme:dark}
+*{box-sizing:border-box} [hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.65}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--panel)}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.brand{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;padding-block:14px 4px}
+.brand h1{margin:0;font-family:var(--head);font-size:21px;letter-spacing:.01em}
+.tag{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--sand);background:var(--sand-soft);padding:2px 8px;border-radius:99px}
+.brand .sub{color:var(--muted);font-size:13px}
+nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+nav a{white-space:nowrap;text-decoration:none;color:var(--muted);padding:8px 12px;border-bottom:2px solid transparent;font-weight:500}
+nav a[aria-current="page"]{color:var(--ink);border-color:var(--accent)}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+main{padding-block:20px 56px}
+section.view{display:grid;gap:16px} section.view>*,.cols>*,.grid>*{min-width:0}
+h2{margin:0;font-family:var(--head);font-size:18px;text-wrap:balance} h3{margin:0;font-size:15px}
+.lede{margin:0;color:var(--muted);max-width:74ch}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.ask{display:flex;gap:8px;flex-wrap:wrap}
+.ask input{flex:1 1 300px;min-width:0;font:inherit;font-size:16px;padding:11px 14px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--ink)}
+.btn{font:inherit;padding:10px 16px;border-radius:9px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer;font-weight:500}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:default}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{font:inherit;font-size:12.5px;padding:4px 10px;border-radius:99px;border:1px solid var(--line);background:var(--soft);color:var(--ink);cursor:pointer;text-align:left}
+.chip small{color:var(--muted)}
+.cols{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:880px){.cols{grid-template-columns:1fr}}
+.ans{font-size:15.5px;margin:0}
+.big{font-family:var(--head);font-size:30px;line-height:1.1;color:var(--accent);margin:6px 0}
+.warnbox{background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:8px 10px;font-size:13px;margin-top:10px}
+.refuse{border-left:3px solid var(--sand);padding-left:12px}
+pre.sql{font-family:var(--mono);font-size:12.5px;background:var(--soft);border-radius:8px;padding:12px;overflow-x:auto;white-space:pre;margin:8px 0 0}
+.trace{font-family:var(--mono);font-size:12px;color:var(--muted);display:grid;gap:2px;margin-top:10px;overflow-wrap:anywhere}
+.note{color:var(--muted);font-size:12.5px}
+.chart{width:100%;overflow-x:auto;margin-top:10px}
+svg text{font-family:var(--mono);font-size:11px;fill:var(--muted)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:500;font-size:12px;white-space:nowrap}
+td.n{font-family:var(--mono);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sev{display:inline-block;font-size:11.5px;padding:1px 8px;border-radius:99px;white-space:nowrap;font-weight:500}
+.sev.error{background:var(--err-soft);color:var(--err)} .sev.warn{background:var(--warn-soft);color:var(--warn)} .sev.info{background:var(--info-soft);color:var(--info)}
+.res{font-weight:600;white-space:nowrap} .res.pass{color:var(--ok)} .res.fail{color:var(--err)}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:880px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi .n{font-family:var(--head);font-size:26px;line-height:1.1}
+.kpi .l{color:var(--muted);font-size:12.5px}
+.story{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:880px){.story{grid-template-columns:1fr}}
+.story .panel{border-top:3px solid var(--sand)}
+.flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:880px){.flow{grid-template-columns:1fr}}
+.layer{display:grid;gap:8px;align-content:start}
+.layer h3{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.model{border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--panel)}
+.model b{font-family:var(--mono);font-size:13px}
+.model .note{display:block}
+details summary{cursor:pointer;color:var(--accent);font-size:13px}
+tr.full td{font-weight:600}
+ul.clean{margin:6px 0 0;padding-left:18px} ul.clean li{margin:4px 0}
+code{font-family:var(--mono);font-size:12px;background:var(--soft);padding:1px 5px;border-radius:4px}
+footer{color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-block:20px}
+</style>
+
+<header><div class="wrap">
+  <div class="brand"><h1>租赁数仓 AI 助手</h1><span class="tag">NSW Rental Bonds · 真实数据</span><span class="sub">新南威尔士州 13 个月、33.9 万份新签租约 · 数仓分层 · 数据质量测试 · 自然语言问数</span></div>
+  <nav aria-label="页面"><a href="#ask">问数</a><a href="#quality">数据质量</a><a href="#warehouse">数仓结构</a><a href="#eval">评测</a><a href="#about">方法与局限</a></nav>
+</div></header>
+
+<main class="wrap">
+<section class="view" id="v-ask">
+  <div class="panel">
+    <form class="ask" id="f"><input id="q" aria-label="输入问题" placeholder="例如：Randwick 两房公寓现在租金多少？" autocomplete="off"><button class="btn" type="submit">查询</button></form>
+    <div class="chips" id="chips"></div>
+  </div>
+  <div class="cols">
+    <div class="panel" id="answer"><p class="note">正在载入 31 万行数据…</p></div>
+    <div class="panel" id="how"><h3>系统是怎么理解的</h3><p class="note">问题先被解析成一个受约束的「查询意图」，再由模板生成 SQL。语言理解不直接写 SQL，所以不会查不存在的字段，也不会被诱导去改数据。</p></div>
+  </div>
+</section>
+
+<section class="view" id="v-quality" hidden>
+  <div><h2>数据质量：测试只负责发现，怎么处理是判断</h2><p class="lede" id="dq-lede"></p></div>
+  <div class="story" id="dq-story"></div>
+  <div class="panel scroll"><table id="t-dq"></table></div>
+</section>
+
+<section class="view" id="v-warehouse" hidden>
+  <div><h2>数仓分层：原始层 → 清洗层 → 模型层</h2><p class="lede">仿 dbt 的写法：每个模型是一个 SQL 文件，用 <code>{{ ref('…') }}</code> 引用上游，运行器按依赖排序后建表并生成血缘。问题行只打标、不删除，事实表行数和原始表完全对得上，任何一个数字都能追到来源文件和行号。</p></div>
+  <div class="flow" id="flow"></div>
+  <div class="panel"><h3>指标口径</h3><ul class="clean">
+    <li><b>新签租约</b>：每条押金登记 = 一份新签租约。数据里没有续租，所以反映的是「新上市房源的成交租金」，不是所有在租房屋的平均租金。</li>
+    <li><b>可分析的行</b>：房型为公寓 / 独立屋 / 联排（排除车位、房间等 Other 和 Unknown），周租金 80–5000 澳元，邮编能匹配到区域。</li>
+    <li><b>租金</b>：默认用中位数，不受极端值影响；均值和 25 / 75 分位也可以问。</li>
+    <li><b>地区</b>：郊区按邮编近似（一个邮编可能包含几个郊区）；同名时默认取郊区，说「市 / council」才取地方政府区（LGA）。</li>
+    <li><b>时间</b>：郊区 / 邮编默认看最近 3 个月（样本更稳），大地区默认看最近 1 个月；排名只比较样本 ≥ 30 份的分组。</li>
+  </ul></div>
+</section>
+
+<section class="view" id="v-eval" hidden>
+  <div><h2>评测：标准答案是手写 SQL</h2><p class="lede">每道题都手写一条标准 SQL，在 SQLite 上执行；系统生成的 SQL 也在 SQLite 上执行，结果一致才算对。另外核对浏览器里算出的数字和 SQLite 是否一致。三套题分开报：开发集调规则用；留出集写完规则才写；第二留出集是看过留出集的错误、改完规则以后才写的新题，不再据此调规则。</p></div>
+  <div class="panel scroll"><table id="t-eval"></table></div>
+  <div class="panel"><h3>留出集暴露的问题（已修，改完又写了第二留出集）</h3><ul class="clean">
+    <li><b>年份被当成邮编</b>：「September 2026」里的 2026 恰好是 Bondi 的邮编。改为年份紧挨月份词时不当邮编。</li>
+    <li><b>「Greater Sydney」被识别成悉尼市区</b>：Sydney 既是 CBD 郊区，也是大悉尼。问排名或说 Greater Sydney 时取大悉尼。</li>
+    <li><b>没收录的地名被截短</b>：「Springfield Heights」被当成 Springfield。后面还跟着大写单词时改为反问，不猜。</li>
+  </ul></div>
+  <div class="panel scroll"><h3>第二留出集仍然答错的题</h3><table id="t-miss"></table></div>
+</section>
+
+<section class="view" id="v-about" hidden>
+  <div class="panel"><h3>数据</h3><ul class="clean">
+    <li>NSW Fair Trading「Rental bond lodgement data」，2025 年 10 月 – 2026 年 10 月，13 个月度文件，共 338,947 行（nsw.gov.au 公开数据）。由 GitHub Actions 定时下载进仓库。</li>
+    <li>邮编 → 区域参考表：australianpostcodes（公开数据集），取 NSW 部分。</li>
+  </ul></div>
+  <div class="panel"><h3>大模型放在哪里</h3><ul class="clean">
+    <li>规则解析覆盖大部分常见问法，零成本、可解释、可评测。</li>
+    <li>规则答不了或理解错时，可以点「请大模型重新理解」。大模型只能返回同一个 JSON 意图结构，返回后照样过校验（指标、地区、月份都必须是数据里有的值）、照样由模板生成 SQL。大模型不碰数据，也不写 SQL。</li>
+    <li>大模型功能需要在 claude.ai 登录后使用；未登录时只用规则。</li>
+  </ul></div>
+  <div class="panel"><h3>局限</h3><ul class="clean">
+    <li>只有新签租约，没有续租和空置率，不能代表全部租客的负担。</li>
+    <li>没有房屋面积、新旧、是否带家具等信息，同样「两房」差别可能很大。</li>
+    <li>规则解析对没见过的说法会理解错（见评测页仍答错的题），这也是保留大模型兜底的原因。</li>
+  </ul></div>
+</section>
+</main>
+<footer><div class="wrap">数据来源：NSW Fair Trading Rental Bond Data（nsw.gov.au）· 邮编参考 australianpostcodes。本页为个人作品，仅作数据工程与数据分析演示。作者：李江鑫 · 代码：github.com/li-iris/rental-dw-ai-assistant</div></footer>
+
+<script>
+/*ENGINE*/
+</script>
+<script>
+const $=s=>document.querySelector(s), esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let E=null, DQ=null, LIN=null, EV=null, last=null;
+const EXAMPLES=[["Randwick 两房公寓现在租金多少","郊区"],["悉尼过去一年两房租金走势","趋势"],["悉尼哪个区一房公寓最贵 top5","排名"],["Parramatta 公寓和独立屋对比","对比"],["全州10月新签租约数量同比","同比"],["How much is a 2 bed unit in Kensington?","英文"],["明年悉尼房租会涨吗","资料外"],["我想在 Springfield Heights 租房","反问"]];
+
+function route(){const v=(location.hash||"#ask").slice(1);const ok=["ask","quality","warehouse","eval","about"].includes(v)?v:"ask";document.querySelectorAll("section.view").forEach(s=>s.hidden=s.id!=="v-"+ok);document.querySelectorAll("nav a").forEach(a=>{if(a.getAttribute("href")==="#"+ok)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")})}
+addEventListener("hashchange",route);
+
+function chart(rows,isMonth){
+  if(!rows||rows.length<2)return "";
+  const W=Math.max(520,rows.length*(isMonth?46:70)),H=200,pl=48,pb=34,pt=12,vals=rows.map(r=>r.value),mx=Math.max(...vals),mn=isMonth?Math.min(...vals)*0.92:0,sy=v=>H-pb-(H-pb-pt)*(v-mn)/((mx-mn)||1);
+  const bw=(W-pl-10)/rows.length;let g="";
+  [0,.5,1].forEach(t=>{const v=mn+(mx-mn)*t,y=sy(v);g+=`<line x1="${pl}" x2="${W-4}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${pl-6}" y="${y+4}" text-anchor="end">${Math.round(v)}</text>`});
+  if(isMonth){const pts=rows.map((r,i)=>`${pl+i*bw+bw/2},${sy(r.value)}`).join(" ");g+=`<polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>`;rows.forEach((r,i)=>{g+=`<circle cx="${pl+i*bw+bw/2}" cy="${sy(r.value)}" r="3.5" fill="var(--accent)"><title>${esc(r.label)}：${esc(r.shown)}（n=${r.n}）</title></circle><text x="${pl+i*bw+bw/2}" y="${H-12}" text-anchor="middle">${esc(String(r.label).slice(2))}</text>`})}
+  else rows.forEach((r,i)=>{const x=pl+i*bw+6,y=sy(r.value);g+=`<rect x="${x}" y="${y}" width="${bw-12}" height="${H-pb-y}" rx="3" fill="var(--accent)"><title>${esc(r.label)}：${esc(r.shown)}（n=${r.n}）</title></rect><text x="${x+(bw-12)/2}" y="${H-12}" text-anchor="middle">${esc(String(r.label).slice(0,12))}</text>`});
+  return `<div class="chart"><svg viewBox="0 0 ${W} ${H}" style="width:100%;min-width:${Math.min(W,520)}px;height:auto" role="img" aria-label="结果图">${g}</svg></div>`;
+}
+
+function render(q,r,viaLLM){
+  last={q,r};
+  const tr=r.trace?`<div class="trace">${r.trace.map(t=>"› "+esc(t)).join("<br>")}</div>`:"";
+  const llmBtn=`<p style="margin-top:12px"><button class="btn ghost" id="llm">理解得不对？请大模型重新理解</button> <span class="note" id="llm-note"></span></p>`;
+  if(r.status!=="OK"){
+    $("#answer").innerHTML=`<div class="refuse"><h3>${r.status==="REFUSE"?"这个问题超出了数据范围":"需要你再说清楚一点"}</h3><p>${esc(r.reason)}</p></div>${r.status==="CLARIFY"?llmBtn:""}`;
+    $("#how").innerHTML=`<h3>系统是怎么理解的</h3>${tr}<p class="note" style="margin-top:8px">${r.status==="REFUSE"?"资料外的问题直接拒答，不硬找一个最像的数字。":"地名、指标对不上时反问，不猜。"}</p>`;return}
+  const a=r.answer,isMonth=r.intent.group_by==="month";
+  let body=`<p class="ans">${esc(a.text)}</p>`;
+  if(r.result.kind==="single"&&r.result.n)body=`<p class="note">${esc(a.text.split("：")[0])}</p><p class="big">${esc(a.text.split("：")[1]?.split("（")[0]||"")}</p><p class="note">${esc((a.text.match(/（.*）/)||[""])[0])}</p>`;
+  if(a.rows){body+=chart(a.rows,isMonth)+`<div class="scroll"><table><tr><th>${isMonth?"月份":"分组"}</th><th style="text-align:right">数值</th><th style="text-align:right">样本</th></tr>${a.rows.map(x=>`<tr><td>${esc(x.label)}</td><td class="n">${esc(x.shown)}</td><td class="n">${x.n.toLocaleString("en-AU")}</td></tr>`).join("")}</table></div>`}
+  if(a.warn)body+=`<div class="warnbox">${esc(a.warn)}</div>`;
+  $("#answer").innerHTML=body+(viaLLM?`<p class="note" style="margin-top:10px">本次意图由大模型给出，已通过校验。</p>`:llmBtn);
+  $("#how").innerHTML=`<h3>系统是怎么理解的</h3><pre class="sql" style="white-space:pre-wrap" aria-label="查询意图">${esc(JSON.stringify(r.intent).replace(/,"/g,', "'))}</pre><h3 style="margin-top:14px">生成的 SQL</h3><pre class="sql">${esc(r.sql)}</pre>${tr}`;
+}
+function show(q){if(!q.trim()||!E)return;$("#q").value=q;render(q,E.ask(q))}
+
+async function llm(){
+  const b=$("#llm"),n=$("#llm-note");if(!last)return;b.disabled=true;n.textContent="正在请大模型解析…";
+  try{
+    const s=window.claude?.use?await claude.use("sample"):null;
+    if(!s){n.textContent="大模型功能需要在 claude.ai 登录后使用；当前只用规则解析。";b.disabled=false;return}
+    const out=await s.json(E.llmPrompt(last.q));
+    if(out&&out.refuse){render(last.q,{status:"REFUSE",reason:"大模型判断：" +out.refuse,trace:["意图来自大模型"]},true);return}
+    const r=E.ask(last.q,out);render(last.q,r,true);
+  }catch(e){n.textContent="大模型暂时不可用（"+(e.code||e.message||"error")+"），仍以规则结果为准。";b.disabled=false}
+}
+
+function quality(){
+  const s=DQ.summary,T=DQ.tests;
+  $("#dq-lede").textContent=`共 ${T.length} 条测试，覆盖原始层、清洗层、模型层。${s.rows.toLocaleString("en-AU")} 行里 ${s.analysable.toLocaleString("en-AU")} 行（${(100*s.analysable/s.rows).toFixed(1)}%）可进入指标，其余打标隔离、不删除。`;
+  const pick=id=>T.find(t=>t.id===id);
+  const st=[["src_rows_per_file","9 月的文件只读到 4 行","政府每月发布的 Excel 格式不完全一样：2026 年 9 月的文件打开后默认是「字段说明」页。按「默认 sheet」读取，整月 2.6 万行会悄悄丢失。现在按表头找数据页，并用「每个文件行数 > 1000」测试兜底。"],
+    ["ref_sa4_column_sane","参考表有一整列是错的","公开邮编表里 SA4_NAME_2021 这一列，NSW 全部写成「Sydney - Sutherland」，Randwick 和纽卡斯尔也不例外。如果直接用，所有分区统计都会错。改用另一列 sa4name，并保留测试防止回退。"],
+    ["stg_rent_range","租金 0 元和 10000 元","低于 80 澳元多为车位、储藏间，高于 5000 有豪宅也有多打一个 0 的。中位数不受影响，但均值会被拉高，所以隔离、不进指标，而不是直接删除。"]];
+  $("#dq-story").innerHTML=st.map(([id,t,d])=>`<div class="panel"><h3>${t}</h3><p class="note" style="margin-top:6px">${d}</p></div>`).join("");
+  $("#t-dq").innerHTML=`<tr><th>层</th><th>级别</th><th>测试</th><th style="text-align:right">不合格</th><th>结果</th><th>处理决定</th></tr>`+T.map(t=>`<tr><td>${t.layer}</td><td><span class="sev ${t.severity}">${t.severity}</span></td><td>${esc(t.name)}<details><summary>SQL</summary><pre class="sql">${esc(t.sql)}</pre></details></td><td class="n">${t.failing.toLocaleString("en-AU")}</td><td class="res ${t.passed?"pass":"fail"}">${t.passed?"通过":t.severity==="error"?"失败":"已记录"}</td><td class="note" style="min-width:260px">${esc(t.decision)}</td></tr>`).join("");
+}
+function warehouse(){
+  const runs=Object.fromEntries(LIN.run.map(x=>[x.model,x.rows]));
+  const L={raw:[{name:"raw_bond_lodgements",doc:"13 个月度 xlsx 原样装载，带来源文件和行号",rows:DQ.summary.rows},{name:"raw_postcodes",doc:"邮编参考表（NSW 部分）原样装载",rows:null}],staging:[],marts:[]};
+  LIN.models.forEach(m=>L[m.layer].push({name:m.name,doc:m.doc,rows:runs[m.name],deps:m.deps.concat(m.sources)}));
+  $("#flow").innerHTML=[["raw","原始层"],["staging","清洗层"],["marts","模型层"]].map(([k,t])=>`<div class="layer"><h3>${t} · ${k}</h3>${L[k].map(m=>`<div class="model"><b>${m.name}</b>${m.rows!=null?` <span class="note" style="display:inline">${m.rows.toLocaleString("en-AU")} 行</span>`:""}<span class="note">${esc(m.doc)}</span>${m.deps&&m.deps.length?`<span class="note">← ${m.deps.join("、")}</span>`:""}</div>`).join("")}</div>`).join("");
+}
+function evalView(){
+  const fm=m=>`<td class="n">${m.n}</td><td class="n">${Math.round(m.acc*100)}%</td><td class="n">${Math.round(m.answerable_acc*100)}%</td><td class="n">${Math.round(m.refuse_acc*100)}%</td><td class="n">${m.false_refuse}</td><td class="n">${m.parity}</td>`;
+  let h=`<tr><th>题集</th><th>阶段</th><th style="text-align:right">题数</th><th style="text-align:right">答对率</th><th style="text-align:right">可答题</th><th style="text-align:right">拒答/反问</th><th style="text-align:right">误拒</th><th style="text-align:right">浏览器=SQLite</th></tr>`;
+  h+=`<tr><td>开发集</td><td>调规则用</td>${fm(EV.dev.metrics)}</tr>`;
+  if(EV.holdout_v1)h+=`<tr><td>留出集</td><td>第一次跑（修复前）</td>${fm(EV.holdout_v1)}</tr>`;
+  h+=`<tr><td>留出集</td><td>修复后（已被调过，仅供参考）</td>${fm(EV.holdout.metrics)}</tr>`;
+  h+=`<tr class="full"><td>第二留出集</td><td>修复后新写，真实水平</td>${fm(EV.holdout2.metrics)}</tr>`;
+  $("#t-eval").innerHTML=h;
+  const miss=EV.holdout2.rows.filter(r=>!r.ok);
+  const why={g03:"「最高的 3 个区」没被识别成排名问法（规则只认「哪个区 / 最贵 / top」）",g05:"「一房和两房」要按两个卧室数分组，规则只取了第一个",g09:"「买一套」是问房价，规则只认「房价 / 买房」，漏拒"};
+  $("#t-miss").innerHTML=`<tr><th>问题</th><th>系统给出</th><th>原因</th></tr>`+miss.map(r=>`<tr><td><button class="chip" data-q="${esc(r.q)}">${esc(r.q)}</button></td><td class="note">${r.status}${r.intent?" · "+esc(JSON.stringify(r.intent).slice(0,90))+"…":""}</td><td class="note">${esc(why[r.id]||"见意图")}</td></tr>`).join("")+`<tr><td colspan="3" class="note">这几类正是「请大模型重新理解」要兜底的情况：规则覆盖不到的说法交给大模型，但大模型的输出同样要过校验。</td></tr>`;
+}
+
+(async()=>{route();
+  try{
+    const [meta,fact,dq,lin,ev]=await Promise.all([fetch("meta.json").then(r=>r.json()),fetch("fact.b64.txt").then(r=>r.text()).then(t=>{const b=atob(t.trim()),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}),fetch("dq.json").then(r=>r.json()),fetch("lineage.json").then(r=>r.json()),fetch("eval.json").then(r=>r.json())]);
+    E=new RentEngine(meta,fact);DQ=dq;LIN=lin;EV=ev;
+  }catch(e){$("#answer").innerHTML='<p class="note">数据载入失败，请刷新页面。</p>';return}
+  $("#chips").innerHTML=EXAMPLES.map(([q,t])=>`<button class="chip" data-q="${esc(q)}">${esc(q)} <small>${t}</small></button>`).join("");
+  document.addEventListener("click",e=>{const c=e.target.closest("[data-q]");if(c){location.hash="#ask";show(c.dataset.q)}if(e.target.id==="llm")llm()});
+  $("#f").onsubmit=e=>{e.preventDefault();show($("#q").value)};
+  quality();warehouse();evalView();show(EXAMPLES[0][0]);
+})();
+</script>

@@ -1,0 +1,487 @@
+{
+ "summary": {
+  "run_at": "2026-11-19T17:27:57",
+  "rows": 338947,
+  "analysable": 313305,
+  "errors_failing": []
+ },
+ "tests": [
+  {
+   "id": "src_rows_per_file",
+   "layer": "raw",
+   "severity": "error",
+   "name": "每个月度文件都读到了数据（行数 > 1000）",
+   "failing": 0,
+   "groups": 0,
+   "passed": true,
+   "decision": "真实发生过：2026 年 9 月的文件打开后默认显示「字段说明」sheet，只读到 4 行。改为按表头匹配找数据 sheet。",
+   "sql": "SELECT source_file, count(*) AS n FROM raw_bond_lodgements GROUP BY source_file HAVING n < 1000",
+   "sample": {
+    "cols": [
+     "source_file",
+     "n"
+    ],
+    "rows": []
+   }
+  },
+  {
+   "id": "src_date_in_file_month",
+   "layer": "raw",
+   "severity": "error",
+   "name": "登记日期落在文件对应的月份内",
+   "failing": 0,
+   "groups": 0,
+   "passed": true,
+   "decision": "不在本月的行说明文件串月或日期列错位，需要回查来源。",
+   "sql": "(Python：文件名月份 vs 日期月份)",
+   "sample": {
+    "cols": [
+     "source_file",
+     "month",
+     "n"
+    ],
+    "rows": []
+   }
+  },
+  {
+   "id": "ref_sa4_column_sane",
+   "layer": "raw",
+   "severity": "warn",
+   "name": "参考表 SA4_NAME_2021 列取值多样（NSW 应有 ≥ 20 个 SA4）",
+   "failing": 1,
+   "groups": 1,
+   "passed": false,
+   "decision": "上游参考表这一列整列都是 'Sydney - Sutherland'（Randwick、纽卡斯尔都被标成 Sutherland）。不用这一列，改用 sa4name，并保留本测试防止回退。",
+   "sql": "SELECT 'SA4_NAME_2021' AS col, count(DISTINCT SA4_NAME_2021) AS distinct_values FROM raw_postcodes HAVING distinct_values < 20",
+   "sample": {
+    "cols": [
+     "col",
+     "distinct_values"
+    ],
+    "rows": [
+     [
+      "SA4_NAME_2021",
+      9
+     ]
+    ]
+   }
+  },
+  {
+   "id": "dim_region_sane",
+   "layer": "marts",
+   "severity": "error",
+   "name": "维度表实际使用的区域列取值多样（≥ 20 个 SA4）",
+   "failing": 0,
+   "groups": 0,
+   "passed": true,
+   "decision": "必须为 0：确认绕开上游坏列之后，维度表的区域是对的。",
+   "sql": "SELECT count(DISTINCT region) AS distinct_regions FROM dim_postcode HAVING distinct_regions < 20",
+   "sample": {
+    "cols": [
+     "distinct_regions"
+    ],
+    "rows": []
+   }
+  },
+  {
+   "id": "stg_not_null_keys",
+   "layer": "staging",
+   "severity": "error",
+   "name": "日期、邮编不为空",
+   "failing": 0,
+   "groups": 0,
+   "passed": true,
+   "decision": "必须为 0。",
+   "sql": "SELECT * FROM stg_bond_lodgements WHERE lodgement_date IS NULL OR postcode IS NULL",
+   "sample": {
+    "cols": [
+     "lodgement_date",
+     "month",
+     "postcode",
+     "dwelling",
+     "bedrooms",
+     "weekly_rent",
+     "dwelling_code_raw",
+     "bedrooms_raw",
+     "weekly_rent_raw",
+     "source_file",
+     "source_row"
+    ],
+    "rows": []
+   }
+  },
+  {
+   "id": "stg_dwelling_code_valid",
+   "layer": "staging",
+   "severity": "warn",
+   "name": "房型编码在 F/H/T/O/U 之内",
+   "failing": 31,
+   "groups": 31,
+   "passed": false,
+   "decision": "多数是数字（1、3、4），疑似录入时房型和卧室数串列。行数极少，标为 Invalid 不进指标，不猜测原值。",
+   "sql": "SELECT dwelling_code_raw, bedrooms_raw, weekly_rent_raw, source_file, source_row FROM stg_bond_lodgements WHERE dwelling = 'Invalid'",
+   "sample": {
+    "cols": [
+     "dwelling_code_raw",
+     "bedrooms_raw",
+     "weekly_rent_raw",
+     "source_file",
+     "source_row"
+    ],
+    "rows": [
+     [
+      "1",
+      "U",
+      "U",
+      "rentalbond_lodgements_april_2026.xlsx",
+      14725
+     ],
+     [
+      "4",
+      "U",
+      "710",
+      "rentalbond_lodgements_april_2026.xlsx",
+      19068
+     ],
+     [
+      "1",
+      "1",
+      "875",
+      "rentalbond_lodgements_august_2026.xlsx",
+      1298
+     ],
+     [
+      "1",
+      "U",
+      "850",
+      "rentalbond_lodgements_august_2026.xlsx",
+      1883
+     ],
+     [
+      "P",
+      "U",
+      "579",
+      "rentalbond_lodgements_august_2026.xlsx",
+      7551
+     ]
+    ]
+   }
+  },
+  {
+   "id": "stg_rent_unknown",
+   "layer": "staging",
+   "severity": "info",
+   "name": "租金为 U（官方说明：未知）",
+   "failing": 3403,
+   "groups": 3403,
+   "passed": false,
+   "decision": "官方字段说明里 U 表示未知，属预期现象；不进租金指标，但计入租约数量。",
+   "sql": "SELECT weekly_rent_raw, source_file, source_row FROM stg_bond_lodgements WHERE weekly_rent IS NULL",
+   "sample": {
+    "cols": [
+     "weekly_rent_raw",
+     "source_file",
+     "source_row"
+    ],
+    "rows": [
+     [
+      "U",
+      "rentalbond_lodgements_april_2026.xlsx",
+      13
+     ],
+     [
+      "U",
+      "rentalbond_lodgements_april_2026.xlsx",
+      568
+     ],
+     [
+      "U",
+      "rentalbond_lodgements_april_2026.xlsx",
+      747
+     ],
+     [
+      "U",
+      "rentalbond_lodgements_april_2026.xlsx",
+      748
+     ],
+     [
+      "U",
+      "rentalbond_lodgements_april_2026.xlsx",
+      812
+     ]
+    ]
+   }
+  },
+  {
+   "id": "stg_bedrooms_unknown",
+   "layer": "staging",
+   "severity": "info",
+   "name": "卧室数为 U（未知）",
+   "failing": 5123,
+   "groups": 5123,
+   "passed": false,
+   "decision": "按卧室数分组时归入「未知」，不丢弃。",
+   "sql": "SELECT bedrooms_raw FROM stg_bond_lodgements WHERE bedrooms IS NULL",
+   "sample": {
+    "cols": [
+     "bedrooms_raw"
+    ],
+    "rows": [
+     [
+      "U"
+     ],
+     [
+      "U"
+     ],
+     [
+      "U"
+     ],
+     [
+      "U"
+     ],
+     [
+      "U"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "stg_rent_range",
+   "layer": "staging",
+   "severity": "warn",
+   "name": "周租金在 80–5000 澳元之间",
+   "failing": 432,
+   "groups": 432,
+   "passed": false,
+   "decision": "低于 80 多为车位、储藏间（官方说明 Other 可能包括车位）；高于 5000 有真实豪宅也有多打一个 0 的。中位数对极端值不敏感，但均值会被拉高，所以统一隔离、不进指标。",
+   "sql": "SELECT dwelling, bedrooms, weekly_rent, postcode, source_file, source_row FROM stg_bond_lodgements WHERE weekly_rent IS NOT NULL AND (weekly_rent < 80 OR weekly_rent > 5000)",
+   "sample": {
+    "cols": [
+     "dwelling",
+     "bedrooms",
+     "weekly_rent",
+     "postcode",
+     "source_file",
+     "source_row"
+    ],
+    "rows": [
+     [
+      "Flat/Unit",
+      3,
+      6000.0,
+      2000,
+      "rentalbond_lodgements_april_2026.xlsx",
+      231
+     ],
+     [
+      "Flat/Unit",
+      3,
+      8500.0,
+      2000,
+      "rentalbond_lodgements_april_2026.xlsx",
+      236
+     ],
+     [
+      "Other",
+      0,
+      60.0,
+      2008,
+      "rentalbond_lodgements_april_2026.xlsx",
+      483
+     ],
+     [
+      "Other",
+      0,
+      65.0,
+      2010,
+      "rentalbond_lodgements_april_2026.xlsx",
+      790
+     ],
+     [
+      "Other",
+      0,
+      60.0,
+      2010,
+      "rentalbond_lodgements_april_2026.xlsx",
+      793
+     ]
+    ]
+   }
+  },
+  {
+   "id": "stg_exact_duplicates",
+   "layer": "staging",
+   "severity": "info",
+   "name": "完全相同的行（同日、同邮编、同房型、同卧室、同租金）",
+   "failing": 32616,
+   "groups": 13116,
+   "passed": false,
+   "decision": "数据没有租约编号，同一栋楼同一天按同价出租多套是正常的，无法判定是重复登记。不去重，记录在案。",
+   "sql": "SELECT lodgement_date, postcode, dwelling_code_raw, bedrooms_raw, weekly_rent_raw, count(*) AS n FROM stg_bond_lodgements GROUP BY 1,2,3,4,5 HAVING n > 1",
+   "sample": {
+    "cols": [
+     "lodgement_date",
+     "postcode",
+     "dwelling_code_raw",
+     "bedrooms_raw",
+     "weekly_rent_raw",
+     "n"
+    ],
+    "rows": [
+     [
+      "2025-10-01",
+      2000,
+      "F",
+      "2",
+      "1600",
+      2
+     ],
+     [
+      "2025-10-01",
+      2009,
+      "F",
+      "2",
+      "980",
+      2
+     ],
+     [
+      "2025-10-01",
+      2017,
+      "F",
+      "2",
+      "1000",
+      3
+     ],
+     [
+      "2025-10-01",
+      2017,
+      "F",
+      "2",
+      "1300",
+      2
+     ],
+     [
+      "2025-10-01",
+      2020,
+      "F",
+      "1",
+      "800",
+      2
+     ]
+    ]
+   }
+  },
+  {
+   "id": "dim_postcode_unique",
+   "layer": "marts",
+   "severity": "error",
+   "name": "邮编维度主键唯一",
+   "failing": 0,
+   "groups": 0,
+   "passed": true,
+   "decision": "必须为 0。",
+   "sql": "SELECT postcode, count(*) n FROM dim_postcode GROUP BY postcode HAVING n > 1",
+   "sample": {
+    "cols": [
+     "postcode",
+     "n"
+    ],
+    "rows": []
+   }
+  },
+  {
+   "id": "fct_postcode_known",
+   "layer": "marts",
+   "severity": "warn",
+   "name": "租约邮编能在维度表里找到",
+   "failing": 745,
+   "groups": 7,
+   "passed": false,
+   "decision": "多为只有邮政信箱、没有投递区域的邮编。数量很少，不进区域指标。",
+   "sql": "SELECT postcode, count(*) AS n FROM fct_lodgement WHERE NOT postcode_known GROUP BY postcode",
+   "sample": {
+    "cols": [
+     "postcode",
+     "n"
+    ],
+    "rows": [
+     [
+      2059,
+      1
+     ],
+     [
+      2174,
+      725
+     ],
+     [
+      2301,
+      6
+     ],
+     [
+      2520,
+      1
+     ],
+     [
+      2789,
+      1
+     ]
+    ]
+   }
+  },
+  {
+   "id": "fct_rowcount_reconciles",
+   "layer": "marts",
+   "severity": "error",
+   "name": "事实表行数 = 原始表行数（清洗不丢行）",
+   "failing": 0,
+   "groups": 0,
+   "passed": true,
+   "decision": "必须为 0：问题行只打标不删除，任何一行都能追到来源文件和行号。",
+   "sql": "SELECT (SELECT count(*) FROM raw_bond_lodgements) AS raw_n, (SELECT count(*) FROM fct_lodgement) AS fct_n WHERE raw_n <> fct_n",
+   "sample": {
+    "cols": [
+     "raw_n",
+     "fct_n"
+    ],
+    "rows": []
+   }
+  },
+  {
+   "id": "mart_volume_anomaly",
+   "layer": "marts",
+   "severity": "warn",
+   "name": "月度租约量与前 3 个月均值相比波动不超过 ±25%",
+   "failing": 0,
+   "groups": 0,
+   "passed": true,
+   "decision": "超出阈值先看是不是装载问题（如 9 月文件），再看季节性（1–2 月是租房旺季）。",
+   "sql": "WITH m AS (SELECT month, count(*) n FROM fct_lodgement GROUP BY month),\n                w AS (SELECT month, n, avg(n) OVER (ORDER BY month ROWS BETWEEN 3 PRECEDING AND 1 PRECEDING) AS prev3,\n                             count(*) OVER (ORDER BY month ROWS BETWEEN 3 PRECEDING AND 1 PRECEDING) AS k FROM m)\n                SELECT month, n, round(prev3) AS prev3_avg, round(100.0*(n-prev3)/prev3,1) AS pct FROM w WHERE k = 3 AND abs(n-prev3)/prev3 > 0.25",
+   "sample": {
+    "cols": [
+     "month",
+     "n",
+     "prev3_avg",
+     "pct"
+    ],
+    "rows": []
+   }
+  },
+  {
+   "id": "mart_freshness",
+   "layer": "marts",
+   "severity": "warn",
+   "name": "最新数据月份距今不超过 2 个月",
+   "failing": 0,
+   "groups": 0,
+   "passed": true,
+   "decision": "NSW 每月中旬发布上月数据；超过 2 个月没更新要检查抓取任务。",
+   "sql": "SELECT max(month) AS latest FROM fct_lodgement HAVING julianday('now') - julianday(max(month) || '-01') > 62",
+   "sample": {
+    "cols": [
+     "latest"
+    ],
+    "rows": []
+   }
+  }
+ ]
+}
