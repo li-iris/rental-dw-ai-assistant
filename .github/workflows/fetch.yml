@@ -1,0 +1,27 @@
+name: fetch-data
+on:
+  push:
+    paths: ['.github/workflows/fetch.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download NSW rental bond lodgement files (public, NSW Fair Trading)
+        run: |
+          mkdir -p data/raw
+          B=https://www.nsw.gov.au/sites/default/files/noindex
+          for p in 2025-11/rentalbond_lodgements_october_2025.xlsx 2025-12/rentalbond_lodgements_november_2025.xlsx 2026-01/rentalbond_lodgements_december_2025.xlsx 2026-02/rentalbond_lodgements_january_2026.xlsx 2026-03/rentalbond_lodgements_february_2026.xlsx 2026-04/rentalbond_lodgements_march_2026.xlsx 2026-05/rentalbond_lodgements_april_2026.xlsx 2026-06/rentalbond_lodgements_may_2026.xlsx 2026-07/rentalbond_lodgements_june_2026.xlsx 2026-08/rentalbond_lodgements_july_2026.xlsx 2026-09/rentalbond_lodgements_august_2026.xlsx 2026-10/rentalbond_lodgements_september_2026.xlsx 2026-11/rentalbond_lodgements_october_2026.xlsx; do
+            curl -fsSL --retry 3 -A "Mozilla/5.0" -o "data/raw/$(basename $p)" "$B/$p" || echo "FAILED $p"
+          done
+          ls -la data/raw
+      - name: Commit
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@users.noreply.github.com
+          git add data/raw
+          git commit -m "data: NSW rental bond lodgements Oct 2025 - Oct 2026" || echo nothing
+          git push
