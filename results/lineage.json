@@ -1,0 +1,94 @@
+{
+ "order": [
+  "stg_postcodes",
+  "dim_postcode",
+  "stg_bond_lodgements",
+  "fct_lodgement",
+  "mart_rent_monthly"
+ ],
+ "models": [
+  {
+   "name": "stg_postcodes",
+   "layer": "staging",
+   "deps": [],
+   "sources": [
+    "raw_postcodes"
+   ],
+   "doc": "邮编参考表清洗：只保留投递区域，统一大小写；注意上游 SA4_NAME_2021 列整列错误，改用 sa4name（数据质量测试会拦截）",
+   "path": "models/staging/stg_postcodes.sql"
+  },
+  {
+   "name": "dim_postcode",
+   "layer": "marts",
+   "deps": [
+    "stg_postcodes"
+   ],
+   "sources": [],
+   "doc": "邮编维度：一个邮编一行；区域取该邮编下出现最多的 SA4 / LGA；标记是否属于大悉尼",
+   "path": "models/marts/dim_postcode.sql"
+  },
+  {
+   "name": "stg_bond_lodgements",
+   "layer": "staging",
+   "deps": [],
+   "sources": [
+    "raw_bond_lodgements"
+   ],
+   "doc": "押金登记清洗：类型转换、编码解码；只转换不删行，问题行在下游打标",
+   "path": "models/staging/stg_bond_lodgements.sql"
+  },
+  {
+   "name": "fct_lodgement",
+   "layer": "marts",
+   "deps": [
+    "dim_postcode",
+    "stg_bond_lodgements"
+   ],
+   "sources": [],
+   "doc": "事实表：每条新签租约一行，带维度和分析可用标记；口径：住宅类型 + 租金 80–5000 澳元/周 + 邮编可匹配",
+   "path": "models/marts/fct_lodgement.sql"
+  },
+  {
+   "name": "mart_rent_monthly",
+   "layer": "marts",
+   "deps": [
+    "fct_lodgement"
+   ],
+   "sources": [],
+   "doc": "指标表：月 × 区域 × 房型 × 卧室数 的租约量与租金分位数（只用 is_analysable 的行）",
+   "path": "models/marts/mart_rent_monthly.sql"
+  }
+ ],
+ "run": [
+  {
+   "model": "stg_postcodes",
+   "layer": "staging",
+   "rows": 5220,
+   "secs": 0.01
+  },
+  {
+   "model": "dim_postcode",
+   "layer": "marts",
+   "rows": 608,
+   "secs": 0.01
+  },
+  {
+   "model": "stg_bond_lodgements",
+   "layer": "staging",
+   "rows": 338947,
+   "secs": 0.31
+  },
+  {
+   "model": "fct_lodgement",
+   "layer": "marts",
+   "rows": 338947,
+   "secs": 0.36
+  },
+  {
+   "model": "mart_rent_monthly",
+   "layer": "marts",
+   "rows": 6514,
+   "secs": 0.28
+  }
+ ]
+}
